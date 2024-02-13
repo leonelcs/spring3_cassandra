@@ -29,36 +29,36 @@ public class CustomerService {
         );
         Customer output = customerRepository.save(customer);
         var customerDtoOutput = new CustomerDto(
-                output.getId(),
-                output.getFirstname(),
-                output.getLastname(),
-                output.getAge(),
-                output.getEmail(),
+                output.id(),
+                output.firstname(),
+                output.lastname(),
+                output.age(),
+                output.email(),
                 new AddressDto(
-                        output.getStreet(),
-                        output.getCity(),
-                        output.getZip(),
-                        output.getCountry(),
-                        output.getNumber()
+                        output.street(),
+                        output.city(),
+                        output.zip(),
+                        output.country(),
+                        output.number()
                 )
         );
         return customerDtoOutput;
     }
 
     public CustomerDto getCustomer(UUID id) {
-        Customer customer = customerRepository.findById(id).orElseThrow();
+        Customer output = customerRepository.findById(id).orElseThrow();
         var customerDtoOutput = new CustomerDto(
-                customer.getId(),
-                customer.getFirstname(),
-                customer.getLastname(),
-                customer.getAge(),
-                customer.getEmail(),
+                output.id(),
+                output.firstname(),
+                output.lastname(),
+                output.age(),
+                output.email(),
                 new AddressDto(
-                        customer.getStreet(),
-                        customer.getCity(),
-                        customer.getZip(),
-                        customer.getCountry(),
-                        customer.getNumber()
+                        output.street(),
+                        output.city(),
+                        output.zip(),
+                        output.country(),
+                        output.number()
                 )
         );
         return customerDtoOutput;

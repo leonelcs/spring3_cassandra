@@ -1,8 +1,19 @@
 version: '3.9'
 
 services:
-  db:
-    container_name: cassandra-dev
+  app:
+    container_name: cassandra-app
+    image: cassandra-app
+    restart: always
+    depends_on:
+      - cassandradb
+    links:
+      - cassandradb
+    ports:
+      - 8080:8080
+  cassandradb:
+    container_name: cassandradb
+    hostname: cassandradb
     image: cassandra
     ports:
       - 9042:9042
@@ -11,8 +22,25 @@ services:
       CASSANDRA_USER: "cassandra"
       CASSANDRA_PASSWORD: "cassandra"
       CASSANDRA_LOCAL_DC: "datacenter1"
-      CASSANDRA_CONTACT_POINTS: "db:9042"
+      CASSANDRA_CONTACT_POINTS: "cassandradb:9042"
       CASSANDRA_KEYSPACE_CQL: "CREATE KEYSPACE commercial WITH REPLICATION = {'class':'SimpleStrategy','replication_factor':1};"
       MONITORING_PROMETHEUS: "false"
       MONITORING_GRAFANA: "false"
       DISTRIBUTED_TRACING_ENABLED: "false"
+    restart: always
+    volumes:
+      - ./src/main/resources/cassandra_scripts/*:/var/lib/cassandra/
+    healthcheck:
+        test: [ "CMD", "cqlsh", "-u cassandra", "-p cassandra" ,"-e describe keyspaces" ]
+        interval: 15s
+        timeout: 10s
+        retries: 10
+  cassandra-load-keyspace:
+    container_name: cassandra-load-keyspace
+    image: cassandra
+    depends_on:
+      cassandradb:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/cassandra_scripts/keyspace_creation.cql:/schema.cql
+    command: /bin/bash -c "echo loading cassandra keyspace && cqlsh cassandra -f /schema.cql"
